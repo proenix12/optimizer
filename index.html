@@ -1,0 +1,58 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <div class="progress">
+        <div class="bar"></div >
+        <div class="percent">0%</div >
+    </div>
+
+    <div id="status"></div>
+
+    <form class="form" method="POST" action="index2.php">
+        <div><textarea name="dirs" id="dir" cols="30" rows="10"></textarea></div>
+        <div><button type="submit">Add</button></div>
+    </form>
+
+    <script>
+        $(document).ready(function(){
+            var bar = $('.bar');
+            var percent = $('.percent');
+            var status = $('#status');
+            $('.form').submit(function(e){
+                e.preventDefault();
+                $.ajax( {
+                type: 'POST',
+                url: 'index2.php',
+                data: {
+                    dir: $('#dir').val()
+
+                }, success: function( data ) {
+                    console.log(data)
+                }, error: function( errorThrown ) {
+                    console.log(errorThrown);
+                }, complete: function(complete){
+                    console.log(complete);
+                }, beforeSend: function(beforeSend){
+                    status.empty();
+                    var percentVal = '0%';
+                    bar.width(percentVal);
+                    percent.html(percentVal);
+                }, uploadProgress: function(event, position, total, percentComplete) {
+                        var percentVal = percentComplete + '%';
+                        bar.width(percentVal);
+                        percent.html(percentVal);
+                }
+            } );
+            })
+        });
+    
+    </script>
+    
+</body>
+</html>
