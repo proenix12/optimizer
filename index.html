@@ -7,11 +7,6 @@
     <title>Document</title>
 </head>
 <body>
-    <div class="progress">
-        <div class="bar"></div >
-        <div class="percent">0%</div >
-    </div>
-
     <div id="status"></div>
 
     <form class="form" method="POST" action="index2.php">
@@ -21,35 +16,47 @@
 
     <script>
         $(document).ready(function(){
-            var bar = $('.bar');
-            var percent = $('.percent');
-            var status = $('#status');
+            function poll(path) {
+                var lastPath = '';
+                const xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState === 4 && this.status === 200) {
+                        console.log(this.responseText);
+                        if (this.status === 200) {
+                            try {
+                                var json = JSON.parse(this.responseText);
+                                lastPath = json.path;
+                            } catch {
+                                poll();
+                                return;
+                            }
+                            
+
+                            if (json.status !== true) {
+                                alert(json.error);return;
+                            }
+                            $('#status').append('<div>' + json.path + '</div>');
+                            poll();
+                        } else {
+                            poll();
+                        }
+                    }
+                };
+                xhttp.open("POST", "index2.php", true);
+                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                if(lastPath){
+                  console.log(lastPath);
+                    xhttp.send("lastPath=" + lastPath + "&dir=" + path);
+                }
+                xhttp.send("dir=" + path);
+            }
+
             $('.form').submit(function(e){
                 e.preventDefault();
-                $.ajax( {
-                type: 'POST',
-                url: 'index2.php',
-                data: {
-                    dir: $('#dir').val()
-
-                }, success: function( data ) {
-                    console.log(data)
-                }, error: function( errorThrown ) {
-                    console.log(errorThrown);
-                }, complete: function(complete){
-                    console.log(complete);
-                }, beforeSend: function(beforeSend){
-                    status.empty();
-                    var percentVal = '0%';
-                    bar.width(percentVal);
-                    percent.html(percentVal);
-                }, uploadProgress: function(event, position, total, percentComplete) {
-                        var percentVal = percentComplete + '%';
-                        bar.width(percentVal);
-                        percent.html(percentVal);
-                }
-            } );
+                let path = $('#dir').val();
+                poll(path);
             })
+            
         });
     
     </script>
